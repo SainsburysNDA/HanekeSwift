@@ -31,7 +31,11 @@ public class NetworkFetcher<T : DataConvertible> : Fetcher<T> {
         self.URL = URL
 
         let key =  URL.absoluteString
-        super.init(key: key!)
+        #if swift(>=2.3)
+            super.init(key: key!)
+        #else
+            super.init(key: key)
+        #endif
     }
     
     public var session : NSURLSession { return NSURLSession.sharedSession() }
@@ -88,7 +92,14 @@ public class NetworkFetcher<T : DataConvertible> : Fetcher<T> {
         
         guard let value = T.convertFromData(data) else {
             let localizedFormat = NSLocalizedString("Failed to convert value from data at URL %@", comment: "Error description")
-            let description = String(format:localizedFormat, URL.absoluteString!)
+
+            #if swift(>=2.3)
+                let urlString = URL.absoluteString!
+            #else
+                let urlString = URL.absoluteString
+            #endif
+
+            let description = String(format:localizedFormat, urlString)
             self.failWithCode(.InvalidData, localizedDescription: description, failure: fail)
             return
         }
